@@ -3,6 +3,8 @@ package fmod
 // #include "fmod_errors.h"
 import "C"
 
+const VERSION = C.FMOD_VERSION
+
 type InitFlags C.FMOD_INITFLAGS
 const(
   INIT_NORMAL InitFlags = C.FMOD_INIT_NORMAL

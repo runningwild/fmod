@@ -95,7 +95,33 @@ func (cg *ChannelGroup) AddGroup(group *ChannelGroup) error {
 // */
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_GetDSPHead       (FMOD_CHANNELGROUP *channelgroup, FMOD_DSP **dsp);
+func (cg *ChannelGroup) GetDSPHead() (*Dsp, error) {
+  var ferr C.FMOD_RESULT
+  var dsp Dsp
+  thread(func() {
+    ferr = C.FMOD_ChannelGroup_GetDSPHead(cg.group, &dsp.dsp)
+  })
+  err := error_map[ferr]
+  if err != nil {
+    return nil, err
+  }
+  return &dsp, nil
+}
+
+
 // FMOD_RESULT F_API FMOD_ChannelGroup_AddDSP           (FMOD_CHANNELGROUP *channelgroup, FMOD_DSP *dsp, FMOD_DSPCONNECTION **connection);
+func (cg *ChannelGroup) AddDSP(dsp *Dsp) (*DspConn, error) {
+  var ferr C.FMOD_RESULT
+  var conn DspConn
+  thread(func() {
+    ferr = C.FMOD_ChannelGroup_AddDSP(cg.group, dsp.dsp, &conn.conn)
+  })
+  err := error_map[ferr]
+  if err != nil {
+    return nil, err
+  }
+  return &conn, nil
+}
 
 // /*
 //      Information only functions.
