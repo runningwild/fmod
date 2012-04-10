@@ -27,7 +27,7 @@ func makeFmodBool(b bool) C.FMOD_BOOL {
 type System struct {
   system *C.FMOD_SYSTEM
 }
-func MakeSystem() (*System, error) {
+func CreateSystem() (*System, error) {
   var system System
   var ferr C.FMOD_RESULT
   thread(func() {
