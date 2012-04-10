@@ -8,7 +8,6 @@ package fmod
 import "C"
 
 import (
-  "fmt"
   "unsafe"
 )
 
@@ -30,7 +29,10 @@ type System struct {
 }
 func MakeSystem() (*System, error) {
   var system System
-  ferr := C.FMOD_System_Create(&system.system)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_Create(&system.system)
+  })
   err := error_map[ferr]
   if err != nil {
     return nil, err
@@ -40,18 +42,27 @@ func MakeSystem() (*System, error) {
 
 // TODO: Bind this to a finalizer
 func (s *System) Release() error {
-  ferr := C.FMOD_System_Release(s.system)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_Release(s.system)
+  })
   s.system = nil
   return error_map[ferr]
 }
 
 func (s *System) SetOutput(output OutputType) error {
-  ferr := C.FMOD_System_SetOutput(s.system, C.FMOD_OUTPUTTYPE(output))
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_SetOutput(s.system, C.FMOD_OUTPUTTYPE(output))
+  })
   return error_map[ferr]
 }
 func (s *System) GetOutput() (OutputType, error) {
   var output_type C.FMOD_OUTPUTTYPE
-  ferr := C.FMOD_System_GetOutput(s.system, &output_type)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_GetOutput(s.system, &output_type)
+  })
   return OutputType(output_type), error_map[ferr]
 }
 
@@ -120,19 +131,28 @@ func (s *System) RegisterDSP() {}
 
 // FMOD_RESULT F_API FMOD_System_Init (FMOD_SYSTEM *system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata);
 func (s *System) Init(max_channels int, flags InitFlags, extra_driver_data interface{}) error {
-  ferr := C.FMOD_System_Init(s.system, C.int(max_channels), C.FMOD_INITFLAGS(flags), unsafe.Pointer(uintptr(0)))
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_Init(s.system, C.int(max_channels), C.FMOD_INITFLAGS(flags), unsafe.Pointer(uintptr(0)))
+  })
   return error_map[ferr]
 }
 
 // FMOD_RESULT FMOD_System_Close                  (FMOD_SYSTEM *system);
 func (s *System) Close() error {
-  ferr := C.FMOD_System_Close(s.system)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_Close(s.system)
+  })
   return error_map[ferr]
 }
 
 // FMOD_RESULT FMOD_System_Update                 (FMOD_SYSTEM *system);
 func (s *System) Update() error {
-  ferr := C.FMOD_System_Update(s.system)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_Update(s.system)
+  })
   return error_map[ferr]
 }
 
@@ -161,7 +181,10 @@ func (s *System) GetStreamBufferSize() {}
 
 func (s *System) GetVersion() (uint, error) {
   var version C.uint
-  ferr := C.FMOD_System_GetVersion(s.system, &version)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_GetVersion(s.system, &version)
+  })
   return uint(version), error_map[ferr]
 }
 
@@ -171,7 +194,10 @@ func (s *System) GetOutputHandle() {}
 // FMOD_RESULT FMOD_System_GetChannelsPlaying     (FMOD_SYSTEM *system, int *channels);
 func (s *System) GetChannelsPlaying() (int, error) {
   var n C.int
-  ferr := C.FMOD_System_GetChannelsPlaying(s.system, &n)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_GetChannelsPlaying(s.system, &n)
+  })
   err := error_map[ferr]
   if err != nil {
     return 0, err
@@ -202,7 +228,10 @@ func (s *System) CreateSound_FromFilename(filename string, mode Mode) (*Sound, e
   var sound Sound
   b := makeNullTerminatedBytes(filename)
   cstr_filename := (*C.char)(unsafe.Pointer(&b[0]))  // TODO: Why did I have to make this unsafe?
-  ferr := C.FMOD_System_CreateSound(s.system, cstr_filename, C.FMOD_MODE(mode), (*C.FMOD_CREATESOUNDEXINFO)(null), &sound.sound)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_CreateSound(s.system, cstr_filename, C.FMOD_MODE(mode), (*C.FMOD_CREATESOUNDEXINFO)(null), &sound.sound)
+  })
   err := error_map[ferr]
   if err != nil {
     return nil, err
@@ -224,7 +253,10 @@ func (s *System) CreateChannelGroup(name string) (*ChannelGroup, error) {
   b := makeNullTerminatedBytes(name)
   cstr_name := (*C.char)(unsafe.Pointer(&b[0]))  // TODO: Why did I have to make this unsafe?
   var cg ChannelGroup
-  ferr := C.FMOD_System_CreateChannelGroup(s.system, cstr_name, &cg.group)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_CreateChannelGroup(s.system, cstr_name, &cg.group)
+  })
   err := error_map[ferr]
   if err != nil {
     return nil, err
@@ -240,7 +272,10 @@ func (s *System) CreateReverb() {}
 // FMOD_RESULT FMOD_System_PlaySound              (FMOD_SYSTEM *system, FMOD_CHANNELINDEX channelid, FMOD_SOUND *sound, FMOD_BOOL paused, FMOD_CHANNEL **channel);
 func (s *System) PlaySound(channel_id ChannelIndex, sound *Sound, paused bool) (*Channel, error) {
   var channel Channel
-  ferr := C.FMOD_System_PlaySound(s.system, C.FMOD_CHANNELINDEX(channel_id), sound.sound, makeFmodBool(paused), &channel.channel)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_PlaySound(s.system, C.FMOD_CHANNELINDEX(channel_id), sound.sound, makeFmodBool(paused), &channel.channel)
+  })
   err := error_map[ferr]
   if err != nil {
     return nil, err
@@ -256,7 +291,10 @@ func (s *System) GetChannel() {}
 // FMOD_RESULT FMOD_System_GetMasterChannelGroup  (FMOD_SYSTEM *system, FMOD_CHANNELGROUP **channelgroup);
 func (s *System) GetMasterChannelGroup() (*ChannelGroup, error) {
   var cg ChannelGroup
-  ferr := C.FMOD_System_GetMasterChannelGroup(s.system, &cg.group)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_System_GetMasterChannelGroup(s.system, &cg.group)
+  })
   err := error_map[ferr]
   if err != nil {
     return nil, err
@@ -324,7 +362,3 @@ func (s *System) GetUserData() {}
 // FMOD_RESULT FMOD_System_GetUserData            (FMOD_SYSTEM *system, void **userdata);
 func (s *System) GetMemoryInfo() {}
 // FMOD_RESULT FMOD_System_GetMemoryInfo          (FMOD_SYSTEM *system, unsigned int memorybits, unsigned int event_memorybits, unsigned int *memoryused, FMOD_MEMORY_USAGE_DETAILS *memoryused_details);
-
-func Main() {
-  fmt.Printf("Rawr\n")
-}

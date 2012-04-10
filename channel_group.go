@@ -10,7 +10,10 @@ type ChannelGroup struct {
 // FMOD_RESULT F_API FMOD_ChannelGroup_Release          (FMOD_CHANNELGROUP *channelgroup);
 // TODO: Bind this to a finalizer
 func (cg *ChannelGroup) Release() error {
-  ferr := C.FMOD_ChannelGroup_Release(cg.group)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_ChannelGroup_Release(cg.group)
+  })
   cg.group = nil
   return error_map[ferr]
 }
@@ -23,7 +26,10 @@ func (cg *ChannelGroup) Release() error {
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_SetVolume        (FMOD_CHANNELGROUP *channelgroup, float volume);
 func (cg *ChannelGroup) SetVolume(volume float64) error {
-  ferr := C.FMOD_ChannelGroup_SetVolume(cg.group, C.float(volume))
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_ChannelGroup_SetVolume(cg.group, C.float(volume))
+  })
   return error_map[ferr]
 }
 
@@ -31,7 +37,10 @@ func (cg *ChannelGroup) SetVolume(volume float64) error {
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_SetPitch         (FMOD_CHANNELGROUP *channelgroup, float pitch);
 func (cg *ChannelGroup) SetPitch(pitch float64) error {
-  ferr := C.FMOD_ChannelGroup_SetPitch(cg.group, C.float(pitch))
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_ChannelGroup_SetPitch(cg.group, C.float(pitch))
+  })
   return error_map[ferr]
 }
 
@@ -43,7 +52,10 @@ func (cg *ChannelGroup) SetPitch(pitch float64) error {
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_SetMute          (FMOD_CHANNELGROUP *channelgroup, FMOD_BOOL mute);
 func (cg *ChannelGroup) SetMute(mute bool) error {
-  ferr := C.FMOD_ChannelGroup_SetMute(cg.group, makeFmodBool(mute))
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_ChannelGroup_SetMute(cg.group, makeFmodBool(mute))
+  })
   return error_map[ferr]
 }
 
@@ -67,7 +79,10 @@ func (cg *ChannelGroup) SetMute(mute bool) error {
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_AddGroup         (FMOD_CHANNELGROUP *channelgroup, FMOD_CHANNELGROUP *group);
 func (cg *ChannelGroup) AddGroup(group *ChannelGroup) error {
-  ferr := C.FMOD_ChannelGroup_AddGroup(cg.group, group.group)
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_ChannelGroup_AddGroup(cg.group, group.group)
+  })
   return error_map[ferr]
 }
 
