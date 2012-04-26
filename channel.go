@@ -11,6 +11,13 @@ type Channel struct {
 // FMOD_RESULT F_API FMOD_Channel_GetSystemObject       (FMOD_CHANNEL *channel, FMOD_SYSTEM **system);
 
 // FMOD_RESULT F_API FMOD_Channel_Stop                  (FMOD_CHANNEL *channel);
+func (c *Channel) Stop() error {
+  var ferr C.FMOD_RESULT
+  thread(func() {
+    ferr = C.FMOD_Channel_Stop(c.channel)
+  })
+  return error_map[ferr]
+}
 
 // FMOD_RESULT F_API FMOD_Channel_SetPaused             (FMOD_CHANNEL *channel, FMOD_BOOL paused);
 func (c *Channel) SetPaused(paused bool) error {
