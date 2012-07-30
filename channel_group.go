@@ -108,7 +108,6 @@ func (cg *ChannelGroup) GetDSPHead() (*Dsp, error) {
   return &dsp, nil
 }
 
-
 // FMOD_RESULT F_API FMOD_ChannelGroup_AddDSP           (FMOD_CHANNELGROUP *channelgroup, FMOD_DSP *dsp, FMOD_DSPCONNECTION **connection);
 func (cg *ChannelGroup) AddDSP(dsp *Dsp) (*DspConn, error) {
   var ferr C.FMOD_RESULT
@@ -141,4 +140,3 @@ func (cg *ChannelGroup) AddDSP(dsp *Dsp) (*DspConn, error) {
 // FMOD_RESULT F_API FMOD_ChannelGroup_GetUserData      (FMOD_CHANNELGROUP *channelgroup, void **userdata);
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_GetMemoryInfo    (FMOD_CHANNELGROUP *channelgroup, unsigned int memorybits, unsigned int event_memorybits, unsigned int *memoryused, FMOD_MEMORY_USAGE_DETAILS *memoryused_details);
-

@@ -6,6 +6,7 @@ import (
 
 var critical_in chan func()
 var critical_out chan struct{}
+
 // Runs the func, f, on the fmod thread, which is locked to an Os thread.
 // This function does not return until after f has returned.
 func thread(f func()) {
@@ -23,5 +24,5 @@ func init() {
       f()
       critical_out <- struct{}{}
     }
-  } ()
+  }()
 }
