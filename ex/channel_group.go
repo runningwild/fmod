@@ -19,7 +19,7 @@ func (cg *ChannelGroup) Release() error {
     ferr = C.FMOD_ChannelGroup_Release(cg.group)
   })
   cg.group = nil
-  return error_map[ferr]
+  return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_GetSystemObject  (FMOD_CHANNELGROUP *channelgroup, FMOD_SYSTEM **system);
@@ -34,7 +34,7 @@ func (cg *ChannelGroup) SetVolume(volume float64) error {
   base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_SetVolume(cg.group, C.float(volume))
   })
-  return error_map[ferr]
+  return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_GetVolume        (FMOD_CHANNELGROUP *channelgroup, float *volume);
@@ -45,7 +45,7 @@ func (cg *ChannelGroup) SetPitch(pitch float64) error {
   base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_SetPitch(cg.group, C.float(pitch))
   })
-  return error_map[ferr]
+  return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_GetPitch         (FMOD_CHANNELGROUP *channelgroup, float *pitch);
@@ -60,7 +60,7 @@ func (cg *ChannelGroup) SetMute(mute bool) error {
   base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_SetMute(cg.group, makeFmodBool(mute))
   })
-  return error_map[ferr]
+  return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_GetMute          (FMOD_CHANNELGROUP *channelgroup, FMOD_BOOL *mute);
@@ -87,7 +87,7 @@ func (cg *ChannelGroup) AddGroup(group *ChannelGroup) error {
   base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_AddGroup(cg.group, group.group)
   })
-  return error_map[ferr]
+  return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_ChannelGroup_GetNumGroups     (FMOD_CHANNELGROUP *channelgroup, int *numgroups);
@@ -105,7 +105,7 @@ func (cg *ChannelGroup) GetDSPHead() (*Dsp, error) {
   base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_GetDSPHead(cg.group, &dsp.dsp)
   })
-  err := error_map[ferr]
+  err := base.ResultToError(ferr)
   if err != nil {
     return nil, err
   }
@@ -119,7 +119,7 @@ func (cg *ChannelGroup) AddDSP(dsp *Dsp) (*DspConn, error) {
   base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_AddDSP(cg.group, dsp.dsp, &conn.conn)
   })
-  err := error_map[ferr]
+  err := base.ResultToError(ferr)
   if err != nil {
     return nil, err
   }

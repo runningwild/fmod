@@ -36,7 +36,7 @@ func CreateSystem() (*System, error) {
   base.Thread(func() {
     ferr = C.FMOD_System_Create(&system.system)
   })
-  err := error_map[ferr]
+  err := base.ResultToError(ferr)
   if err != nil {
     return nil, err
   }
@@ -50,7 +50,7 @@ func (s *System) Release() error {
     ferr = C.FMOD_System_Release(s.system)
   })
   s.system = nil
-  return error_map[ferr]
+  return base.ResultToError(ferr)
 }
 
 func (s *System) SetOutput(output OutputType) error {
@@ -58,7 +58,7 @@ func (s *System) SetOutput(output OutputType) error {
   base.Thread(func() {
     ferr = C.FMOD_System_SetOutput(s.system, C.FMOD_OUTPUTTYPE(output))
   })
-  return error_map[ferr]
+  return base.ResultToError(ferr)
 }
 func (s *System) GetOutput() (OutputType, error) {
   var output_type C.FMOD_OUTPUTTYPE
@@ -66,7 +66,7 @@ func (s *System) GetOutput() (OutputType, error) {
   base.Thread(func() {
     ferr = C.FMOD_System_GetOutput(s.system, &output_type)
   })
-  return OutputType(output_type), error_map[ferr]
+  return OutputType(output_type), base.ResultToError(ferr)
 }
 
 func (s *System) GetNumDrivers() {}
@@ -169,7 +169,7 @@ func (s *System) Init(max_channels int, flags InitFlags, extra_driver_data inter
   base.Thread(func() {
     ferr = C.FMOD_System_Init(s.system, C.int(max_channels), C.FMOD_INITFLAGS(flags), unsafe.Pointer(uintptr(0)))
   })
-  return error_map[ferr]
+  return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT FMOD_System_Close                  (FMOD_SYSTEM *system);
@@ -178,7 +178,7 @@ func (s *System) Close() error {
   base.Thread(func() {
     ferr = C.FMOD_System_Close(s.system)
   })
-  return error_map[ferr]
+  return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT FMOD_System_Update                 (FMOD_SYSTEM *system);
@@ -187,7 +187,7 @@ func (s *System) Update() error {
   base.Thread(func() {
     ferr = C.FMOD_System_Update(s.system)
   })
-  return error_map[ferr]
+  return base.ResultToError(ferr)
 }
 
 func (s *System) Set3DSettings() {}
@@ -230,7 +230,7 @@ func (s *System) GetVersion() (uint, error) {
   base.Thread(func() {
     ferr = C.FMOD_System_GetVersion(s.system, &version)
   })
-  return uint(version), error_map[ferr]
+  return uint(version), base.ResultToError(ferr)
 }
 
 func (s *System) GetOutputHandle() {}
@@ -244,7 +244,7 @@ func (s *System) GetChannelsPlaying() (int, error) {
   base.Thread(func() {
     ferr = C.FMOD_System_GetChannelsPlaying(s.system, &n)
   })
-  err := error_map[ferr]
+  err := base.ResultToError(ferr)
   if err != nil {
     return 0, err
   }
@@ -286,7 +286,7 @@ func (s *System) CreateSound_FromFilename(filename string, mode Mode) (*Sound, e
   base.Thread(func() {
     ferr = C.FMOD_System_CreateSound(s.system, cstr_filename, C.FMOD_MODE(mode), (*C.FMOD_CREATESOUNDEXINFO)(null), &sound.sound)
   })
-  err := error_map[ferr]
+  err := base.ResultToError(ferr)
   if err != nil {
     return nil, err
   }
@@ -315,7 +315,7 @@ func (s *System) CreateChannelGroup(name string) (*ChannelGroup, error) {
   base.Thread(func() {
     ferr = C.FMOD_System_CreateChannelGroup(s.system, cstr_name, &cg.group)
   })
-  err := error_map[ferr]
+  err := base.ResultToError(ferr)
   if err != nil {
     return nil, err
   }
@@ -336,7 +336,7 @@ func (s *System) PlaySound(channel_id ChannelIndex, sound *Sound, paused bool) (
   base.Thread(func() {
     ferr = C.FMOD_System_PlaySound(s.system, C.FMOD_CHANNELINDEX(channel_id), sound.sound, makeFmodBool(paused), &channel.channel)
   })
-  err := error_map[ferr]
+  err := base.ResultToError(ferr)
   if err != nil {
     return nil, err
   }
@@ -357,7 +357,7 @@ func (s *System) GetMasterChannelGroup() (*ChannelGroup, error) {
   base.Thread(func() {
     ferr = C.FMOD_System_GetMasterChannelGroup(s.system, &cg.group)
   })
-  err := error_map[ferr]
+  err := base.ResultToError(ferr)
   if err != nil {
     return nil, err
   }
