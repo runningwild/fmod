@@ -1,4 +1,4 @@
-package fmod
+package fmod_ex
 
 // #cgo darwin  LDFLAGS: -Llib -lfmodex
 // #cgo CFLAGS: -Iinc
@@ -9,6 +9,7 @@ import "C"
 
 import (
   "unsafe"
+  "github.com/runningwild/fmod/base"
 )
 
 const null = unsafe.Pointer(uintptr(0))
@@ -32,7 +33,7 @@ type System struct {
 func CreateSystem() (*System, error) {
   var system System
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_Create(&system.system)
   })
   err := error_map[ferr]
@@ -45,7 +46,7 @@ func CreateSystem() (*System, error) {
 // TODO: Bind this to a finalizer
 func (s *System) Release() error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_Release(s.system)
   })
   s.system = nil
@@ -54,7 +55,7 @@ func (s *System) Release() error {
 
 func (s *System) SetOutput(output OutputType) error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_SetOutput(s.system, C.FMOD_OUTPUTTYPE(output))
   })
   return error_map[ferr]
@@ -62,7 +63,7 @@ func (s *System) SetOutput(output OutputType) error {
 func (s *System) GetOutput() (OutputType, error) {
   var output_type C.FMOD_OUTPUTTYPE
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_GetOutput(s.system, &output_type)
   })
   return OutputType(output_type), error_map[ferr]
@@ -165,7 +166,7 @@ func (s *System) RegisterDSP() {}
 // FMOD_RESULT F_API FMOD_System_Init (FMOD_SYSTEM *system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata);
 func (s *System) Init(max_channels int, flags InitFlags, extra_driver_data interface{}) error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_Init(s.system, C.int(max_channels), C.FMOD_INITFLAGS(flags), unsafe.Pointer(uintptr(0)))
   })
   return error_map[ferr]
@@ -174,7 +175,7 @@ func (s *System) Init(max_channels int, flags InitFlags, extra_driver_data inter
 // FMOD_RESULT FMOD_System_Close                  (FMOD_SYSTEM *system);
 func (s *System) Close() error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_Close(s.system)
   })
   return error_map[ferr]
@@ -183,7 +184,7 @@ func (s *System) Close() error {
 // FMOD_RESULT FMOD_System_Update                 (FMOD_SYSTEM *system);
 func (s *System) Update() error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_Update(s.system)
   })
   return error_map[ferr]
@@ -226,7 +227,7 @@ func (s *System) GetStreamBufferSize() {}
 func (s *System) GetVersion() (uint, error) {
   var version C.uint
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_GetVersion(s.system, &version)
   })
   return uint(version), error_map[ferr]
@@ -240,7 +241,7 @@ func (s *System) GetOutputHandle() {}
 func (s *System) GetChannelsPlaying() (int, error) {
   var n C.int
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_GetChannelsPlaying(s.system, &n)
   })
   err := error_map[ferr]
@@ -282,7 +283,7 @@ func (s *System) CreateSound_FromFilename(filename string, mode Mode) (*Sound, e
   b := makeNullTerminatedBytes(filename)
   cstr_filename := (*C.char)(unsafe.Pointer(&b[0])) // TODO: Why did I have to make this unsafe?
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_CreateSound(s.system, cstr_filename, C.FMOD_MODE(mode), (*C.FMOD_CREATESOUNDEXINFO)(null), &sound.sound)
   })
   err := error_map[ferr]
@@ -311,7 +312,7 @@ func (s *System) CreateChannelGroup(name string) (*ChannelGroup, error) {
   cstr_name := (*C.char)(unsafe.Pointer(&b[0])) // TODO: Why did I have to make this unsafe?
   var cg ChannelGroup
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_CreateChannelGroup(s.system, cstr_name, &cg.group)
   })
   err := error_map[ferr]
@@ -332,7 +333,7 @@ func (s *System) CreateReverb() {}
 func (s *System) PlaySound(channel_id ChannelIndex, sound *Sound, paused bool) (*Channel, error) {
   var channel Channel
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_PlaySound(s.system, C.FMOD_CHANNELINDEX(channel_id), sound.sound, makeFmodBool(paused), &channel.channel)
   })
   err := error_map[ferr]
@@ -353,7 +354,7 @@ func (s *System) GetChannel() {}
 func (s *System) GetMasterChannelGroup() (*ChannelGroup, error) {
   var cg ChannelGroup
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_System_GetMasterChannelGroup(s.system, &cg.group)
   })
   err := error_map[ferr]

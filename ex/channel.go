@@ -1,7 +1,11 @@
-package fmod
+package fmod_ex
 
 // #include "fmod.h"
 import "C"
+
+import (
+  "github.com/runningwild/fmod/base"
+)
 
 type Channel struct {
   channel *C.FMOD_CHANNEL
@@ -13,7 +17,7 @@ type Channel struct {
 // FMOD_RESULT F_API FMOD_Channel_Stop                  (FMOD_CHANNEL *channel);
 func (c *Channel) Stop() error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_Channel_Stop(c.channel)
   })
   return error_map[ferr]
@@ -22,7 +26,7 @@ func (c *Channel) Stop() error {
 // FMOD_RESULT F_API FMOD_Channel_SetPaused             (FMOD_CHANNEL *channel, FMOD_BOOL paused);
 func (c *Channel) SetPaused(paused bool) error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_Channel_SetPaused(c.channel, makeFmodBool(paused))
   })
   return error_map[ferr]
@@ -57,7 +61,7 @@ func (c *Channel) SetPaused(paused bool) error {
 // FMOD_RESULT F_API FMOD_Channel_SetChannelGroup       (FMOD_CHANNEL *channel, FMOD_CHANNELGROUP *channelgroup);
 func (c *Channel) SetChannelGroup(group *ChannelGroup) error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_Channel_SetChannelGroup(c.channel, group.group)
   })
   return error_map[ferr]

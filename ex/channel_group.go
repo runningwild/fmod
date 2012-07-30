@@ -1,7 +1,11 @@
-package fmod
+package fmod_ex
 
 // #include "fmod.h"
 import "C"
+
+import (
+  "github.com/runningwild/fmod/base"
+)
 
 type ChannelGroup struct {
   group *C.FMOD_CHANNELGROUP
@@ -11,7 +15,7 @@ type ChannelGroup struct {
 // TODO: Bind this to a finalizer
 func (cg *ChannelGroup) Release() error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_Release(cg.group)
   })
   cg.group = nil
@@ -27,7 +31,7 @@ func (cg *ChannelGroup) Release() error {
 // FMOD_RESULT F_API FMOD_ChannelGroup_SetVolume        (FMOD_CHANNELGROUP *channelgroup, float volume);
 func (cg *ChannelGroup) SetVolume(volume float64) error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_SetVolume(cg.group, C.float(volume))
   })
   return error_map[ferr]
@@ -38,7 +42,7 @@ func (cg *ChannelGroup) SetVolume(volume float64) error {
 // FMOD_RESULT F_API FMOD_ChannelGroup_SetPitch         (FMOD_CHANNELGROUP *channelgroup, float pitch);
 func (cg *ChannelGroup) SetPitch(pitch float64) error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_SetPitch(cg.group, C.float(pitch))
   })
   return error_map[ferr]
@@ -53,7 +57,7 @@ func (cg *ChannelGroup) SetPitch(pitch float64) error {
 // FMOD_RESULT F_API FMOD_ChannelGroup_SetMute          (FMOD_CHANNELGROUP *channelgroup, FMOD_BOOL mute);
 func (cg *ChannelGroup) SetMute(mute bool) error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_SetMute(cg.group, makeFmodBool(mute))
   })
   return error_map[ferr]
@@ -80,7 +84,7 @@ func (cg *ChannelGroup) SetMute(mute bool) error {
 // FMOD_RESULT F_API FMOD_ChannelGroup_AddGroup         (FMOD_CHANNELGROUP *channelgroup, FMOD_CHANNELGROUP *group);
 func (cg *ChannelGroup) AddGroup(group *ChannelGroup) error {
   var ferr C.FMOD_RESULT
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_AddGroup(cg.group, group.group)
   })
   return error_map[ferr]
@@ -98,7 +102,7 @@ func (cg *ChannelGroup) AddGroup(group *ChannelGroup) error {
 func (cg *ChannelGroup) GetDSPHead() (*Dsp, error) {
   var ferr C.FMOD_RESULT
   var dsp Dsp
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_GetDSPHead(cg.group, &dsp.dsp)
   })
   err := error_map[ferr]
@@ -112,7 +116,7 @@ func (cg *ChannelGroup) GetDSPHead() (*Dsp, error) {
 func (cg *ChannelGroup) AddDSP(dsp *Dsp) (*DspConn, error) {
   var ferr C.FMOD_RESULT
   var conn DspConn
-  thread(func() {
+  base.Thread(func() {
     ferr = C.FMOD_ChannelGroup_AddDSP(cg.group, dsp.dsp, &conn.conn)
   })
   err := error_map[ferr]

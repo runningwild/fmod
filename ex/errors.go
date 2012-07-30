@@ -1,4 +1,4 @@
-package fmod
+package fmod_ex
 
 // #include "fmod_errors.h"
 import "C"
