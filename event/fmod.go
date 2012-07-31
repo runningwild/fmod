@@ -207,7 +207,22 @@ func (sys *EventSystem) LoadPath(path string, info *LoadInfo) error {
 // FMOD_RESULT F_API FMOD_EventSystem_GetCategoryByIndex(FMOD_EVENTSYSTEM *eventsystem, int index, FMOD_EVENTCATEGORY **category);
 // FMOD_RESULT F_API FMOD_EventSystem_GetMusicCategory  (FMOD_EVENTSYSTEM *eventsystem, FMOD_EVENTCATEGORY **category);
 // FMOD_RESULT F_API FMOD_EventSystem_GetNumCategories  (FMOD_EVENTSYSTEM *eventsystem, int *numcategories);
+
 // FMOD_RESULT F_API FMOD_EventSystem_GetGroup          (FMOD_EVENTSYSTEM *eventsystem, const char *name, FMOD_BOOL cacheevents, FMOD_EVENTGROUP **group);
+func (sys *EventSystem) GetGroup(name string, cache_events bool) (*Group, error) {
+  var ferr C.FMOD_RESULT
+  var group Group
+  base.Thread(func() {
+    cname := C.CString(name)
+    ferr = C.FMOD_EventSystem_GetGroup(sys.system, cname, makeFmodBool(cache_events), &group.group)
+    C.free(unsafe.Pointer(cname))
+  })
+  err := base.ResultToError(ferr)
+  if err != nil {
+    return nil, err
+  }
+  return &group, nil
+}
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetEvent          (FMOD_EVENTSYSTEM *eventsystem, const char *name, FMOD_EVENT_MODE mode, FMOD_EVENT **event);
 func (sys *EventSystem) GetEvent(name string, mode Mode) (*Event, error) {
@@ -226,9 +241,31 @@ func (sys *EventSystem) GetEvent(name string, mode Mode) (*Event, error) {
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetEventBySystemID(FMOD_EVENTSYSTEM *eventsystem, unsigned int systemid, FMOD_EVENT_MODE mode, FMOD_EVENT **event);
+func (sys *EventSystem) GetEventBySystemID(system_id int, mode Mode) (*Event, error) {
+  var ferr C.FMOD_RESULT
+  var event Event
+  base.Thread(func() {
+    ferr = C.FMOD_EventSystem_GetEventBySystemID(sys.system, C.uint(system_id), C.FMOD_EVENT_MODE(mode), &event.event)
+  })
+  err := base.ResultToError(ferr)
+  if err != nil {
+    return nil, err
+  }
+  return &event, nil
+}
+
 // FMOD_RESULT F_API FMOD_EventSystem_GetEventByGUID    (FMOD_EVENTSYSTEM *eventsystem, const FMOD_GUID *guid, FMOD_EVENT_MODE mode, FMOD_EVENT **event);
 // FMOD_RESULT F_API FMOD_EventSystem_GetEventByGUIDString(FMOD_EVENTSYSTEM *eventsystem, const char *guid, FMOD_EVENT_MODE mode, FMOD_EVENT **event);
+
 // FMOD_RESULT F_API FMOD_EventSystem_GetNumEvents      (FMOD_EVENTSYSTEM *eventsystem, int *numevents);
+func (sys *EventSystem) GetNumEvents() (int, error) {
+  var ferr C.FMOD_RESULT
+  var num_events C.int
+  base.Thread(func() {
+    ferr = C.FMOD_EventSystem_GetNumEvents(sys.system, &num_events)
+  })
+  return int(num_events), base.ResultToError(ferr)
+}
 
 /*
    Reverb interfaces.

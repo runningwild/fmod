@@ -6,6 +6,7 @@ import "C"
 
 import (
   "errors"
+  "unsafe"
   "github.com/runningwild/fmod/base"
 )
 
@@ -41,8 +42,17 @@ func (e *Event) Stop(immediate bool) error {
 }
 
 // FMOD_RESULT F_API FMOD_Event_GetInfo                 (FMOD_EVENT *event, int *index, char **name, FMOD_EVENT_INFO *info);
-func (e *Event) GetInfo() error {
-  return errors.New("Event.GetInfo() has not been implemented yet.")
+func (e *Event) GetInfo() (index int, name string, err error) {
+  var ferr C.FMOD_RESULT
+  var cindex C.int
+  var pcname *C.char
+  base.Thread(func() {
+    ferr = C.FMOD_Event_GetInfo(e.event, &cindex, &pcname, nil)
+  })
+  if pcname != nil {
+    name = C.GoString(pcname)
+  }
+  return int(cindex), name, base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_Event_GetState                (FMOD_EVENT *event, FMOD_EVENT_STATE *state);
@@ -71,8 +81,19 @@ func (e *Event) SetCallback() error {
 }
 
 // FMOD_RESULT F_API FMOD_Event_GetParameter            (FMOD_EVENT *event, const char *name, FMOD_EVENTPARAMETER **parameter);
-func (e *Event) GetParameter() error {
-  return errors.New("Event.GetParameter() has not been implemented yet.")
+func (e *Event) GetParameter(name string) (*Param, error) {
+  var ferr C.FMOD_RESULT
+  var p Param
+  base.Thread(func() {
+    cname := C.CString(name)
+    ferr = C.FMOD_Event_GetParameter(e.event, cname, &p.param)
+    C.free(unsafe.Pointer(cname))
+  })
+  err := base.ResultToError(ferr)
+  if err != nil {
+    return nil, err
+  }
+  return &p, nil
 }
 
 // FMOD_RESULT F_API FMOD_Event_GetParameterByIndex     (FMOD_EVENT *event, int index, FMOD_EVENTPARAMETER **parameter);
