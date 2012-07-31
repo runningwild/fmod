@@ -7,11 +7,19 @@ import "C"
 import (
   "errors"
   "unsafe"
+  "runtime"
   "github.com/runningwild/fmod/base"
 )
 
 type Event struct {
   event *C.FMOD_EVENT
+
+  // The group this was loaded from, nil if it wasn't loaded from a group.
+  group *Group
+}
+
+func finalizeEvent(event *Event) {
+  event.Release(true, true)
 }
 
 // FMOD_RESULT F_API FMOD_Event_Release                 (FMOD_EVENT *event, FMOD_BOOL freeeventdata, FMOD_BOOL waituntilready);
@@ -20,6 +28,7 @@ func (e *Event) Release(free_event_data, wait_until_ready bool) error {
   base.Thread(func() {
     ferr = C.FMOD_Event_Release(e.event, makeFmodBool(free_event_data), makeFmodBool(wait_until_ready))
   })
+  runtime.SetFinalizer(e, nil)
   return base.ResultToError(ferr)
 }
 

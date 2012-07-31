@@ -72,3 +72,11 @@ const (
   STATE_STARVING             = C.FMOD_EVENT_STATE_STARVING       /* Event is streaming but not being fed data in time, so may be stuttering. */
   STATE_NEEDSTOLOAD          = C.FMOD_EVENT_STATE_NEEDSTOLOAD    /* Event still needs to load wavebank data. */
 )
+
+type Resource C.FMOD_EVENT_RESOURCE
+
+const (
+  RESOURCE_STREAMS_AND_SAMPLES Resource = C.FMOD_EVENT_RESOURCE_STREAMS_AND_SAMPLES /* Open all streams and load all banks into memory, under this group (recursive) */
+  RESOURCE_STREAMS                      = C.FMOD_EVENT_RESOURCE_STREAMS             /* Open all streams under this group (recursive).  No samples are loaded. */
+  RESOURCE_SAMPLES                      = C.FMOD_EVENT_RESOURCE_SAMPLES             /* Load all banks into memory, under this group (recursive).  No streams are opened. */
+)

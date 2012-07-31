@@ -9,6 +9,7 @@ import "C"
 import (
   "errors"
   "unsafe"
+  "runtime"
   "github.com/runningwild/fmod/base"
 )
 
@@ -19,111 +20,114 @@ func makeFmodBool(b bool) C.FMOD_BOOL {
   return 0
 }
 
-type EventSystem struct {
+type System struct {
   system *C.FMOD_EVENTSYSTEM
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_Create(FMOD_EVENTSYSTEM **eventsystem);
-func EventSystemCreate() (*EventSystem, error) {
-  var event EventSystem
+func EventSystemCreate() (*System, error) {
+  var system System
   var ferr C.FMOD_RESULT
   base.Thread(func() {
-    ferr = C.FMOD_EventSystem_Create(&event.system)
+    ferr = C.FMOD_EventSystem_Create(&system.system)
   })
   err := base.ResultToError(ferr)
   if err != nil {
     return nil, err
   }
-  return &event, err
+  runtime.SetFinalizer(&system, func(sys *System) {
+    sys.Release()
+  })
+  return &system, err
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_Init              (FMOD_EVENTSYSTEM *eventsystem, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata, FMOD_EVENT_INITFLAGS eventflags);
-func (sys *EventSystem) Init(max_channels int, init_flags InitFlags, extradriverdata interface{}, event_init_flags EventInitFlags) error {
+func (system *System) Init(max_channels int, init_flags InitFlags, extradriverdata interface{}, event_init_flags EventInitFlags) error {
   var ferr C.FMOD_RESULT
   base.Thread(func() {
-    ferr = C.FMOD_EventSystem_Init(sys.system, C.int(max_channels), C.FMOD_INITFLAGS(init_flags), unsafe.Pointer(uintptr(0)), C.FMOD_EVENT_INITFLAGS(event_init_flags))
+    ferr = C.FMOD_EventSystem_Init(system.system, C.int(max_channels), C.FMOD_INITFLAGS(init_flags), unsafe.Pointer(uintptr(0)), C.FMOD_EVENT_INITFLAGS(event_init_flags))
   })
   return base.ResultToError(ferr)
 }
 
-// TODO: Bind this to a finalizer
 // FMOD_RESULT F_API FMOD_EventSystem_Release           (FMOD_EVENTSYSTEM *eventsystem);
-func (sys *EventSystem) Release() error {
+func (system *System) Release() error {
   var ferr C.FMOD_RESULT
   base.Thread(func() {
-    ferr = C.FMOD_EventSystem_Release(sys.system)
+    ferr = C.FMOD_EventSystem_Release(system.system)
   })
+  runtime.SetFinalizer(system, nil)
   return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_Update            (FMOD_EVENTSYSTEM *eventsystem);
-func (sys *EventSystem) Update() error {
+func (system *System) Update() error {
   var ferr C.FMOD_RESULT
   base.Thread(func() {
-    ferr = C.FMOD_EventSystem_Update(sys.system)
+    ferr = C.FMOD_EventSystem_Update(system.system)
   })
   return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_SetMediaPath      (FMOD_EVENTSYSTEM *eventsystem, const char *path);
-func (sys *EventSystem) SetMediaPath(path string) error {
+func (system *System) SetMediaPath(path string) error {
   var ferr C.FMOD_RESULT
   base.Thread(func() {
     cpath := C.CString(path)
-    ferr = C.FMOD_EventSystem_SetMediaPath(sys.system, cpath)
+    ferr = C.FMOD_EventSystem_SetMediaPath(system.system, cpath)
     C.free(unsafe.Pointer(cpath))
   })
   return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_SetPluginPath     (FMOD_EVENTSYSTEM *eventsystem, const char *path);
-func (sys *EventSystem) SetPluginPath(path string) error {
+func (system *System) SetPluginPath(path string) error {
   var ferr C.FMOD_RESULT
   base.Thread(func() {
     cpath := C.CString(path)
-    ferr = C.FMOD_EventSystem_SetPluginPath(sys.system, cpath)
+    ferr = C.FMOD_EventSystem_SetPluginPath(system.system, cpath)
     C.free(unsafe.Pointer(cpath))
   })
   return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetVersion        (FMOD_EVENTSYSTEM *eventsystem, unsigned int *version);
-func (sys *EventSystem) GetVersion() (uint32, error) {
+func (system *System) GetVersion() (uint32, error) {
   var ferr C.FMOD_RESULT
   var version C.uint
   base.Thread(func() {
-    ferr = C.FMOD_EventSystem_GetVersion(sys.system, &version)
+    ferr = C.FMOD_EventSystem_GetVersion(system.system, &version)
   })
   return uint32(version), base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetInfo           (FMOD_EVENTSYSTEM *eventsystem, FMOD_EVENT_SYSTEMINFO *info);
-func (sys *EventSystem) GetInfo() error {
+func (system *System) GetInfo() error {
   return errors.New("fmod_event.GetInfo() is not implemented.")
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetSystemObject   (FMOD_EVENTSYSTEM *eventsystem, FMOD_SYSTEM **system);
-func (sys *EventSystem) GetSystemObject() error {
+func (system *System) GetSystemObject() error {
   return errors.New("fmod_event.GetSystemObject() is not implemented.")
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetMusicSystem    (FMOD_EVENTSYSTEM *eventsystem, FMOD_MUSICSYSTEM **musicsystem);
-func (sys *EventSystem) GetMusicSystem() error {
+func (system *System) GetMusicSystem() error {
   return errors.New("fmod_event.GetMusicSystem() is not implemented.")
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_SetLanguage       (FMOD_EVENTSYSTEM *eventsystem, const char *language);
-func (sys *EventSystem) SetLanguage() error {
+func (system *System) SetLanguage() error {
   return errors.New("fmod_event.SetLanguage() is not implemented.")
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetLanguage       (FMOD_EVENTSYSTEM *eventsystem, char *language);
-func (sys *EventSystem) GetLanguage() error {
+func (system *System) GetLanguage() error {
   return errors.New("fmod_event.GetLanguage() is not implemented.")
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_RegisterDSP       (FMOD_EVENTSYSTEM *eventsystem, FMOD_DSP_DESCRIPTION *description, unsigned int *handle);
-func (sys *EventSystem) RegisterDSP() error {
+func (system *System) RegisterDSP() error {
   return errors.New("fmod_event.RegisterDSP() is not implemented.")
 }
 
@@ -175,7 +179,7 @@ func (info *LoadInfo) cIfy() *C.FMOD_EVENT_LOADINFO {
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_Load              (FMOD_EVENTSYSTEM *eventsystem, const char *name_or_data, FMOD_EVENT_LOADINFO *loadinfo, FMOD_EVENTPROJECT **project);
-func (sys *EventSystem) LoadPath(path string, info *LoadInfo) error {
+func (system *System) LoadPath(path string, info *LoadInfo) error {
   var ferr C.FMOD_RESULT
   base.Thread(func() {
     cpath := C.CString(path)
@@ -183,7 +187,7 @@ func (sys *EventSystem) LoadPath(path string, info *LoadInfo) error {
     if info != nil {
       cinfo = info.cIfy()
     }
-    ferr = C.FMOD_EventSystem_Load(sys.system, cpath, cinfo, (**C.FMOD_EVENTPROJECT)(unsafe.Pointer(uintptr(0))))
+    ferr = C.FMOD_EventSystem_Load(system.system, cpath, cinfo, (**C.FMOD_EVENTPROJECT)(unsafe.Pointer(uintptr(0))))
     if info != nil {
       if cinfo.encryptionkey != nil {
         C.free(unsafe.Pointer(cinfo.encryptionkey))
@@ -209,12 +213,12 @@ func (sys *EventSystem) LoadPath(path string, info *LoadInfo) error {
 // FMOD_RESULT F_API FMOD_EventSystem_GetNumCategories  (FMOD_EVENTSYSTEM *eventsystem, int *numcategories);
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetGroup          (FMOD_EVENTSYSTEM *eventsystem, const char *name, FMOD_BOOL cacheevents, FMOD_EVENTGROUP **group);
-func (sys *EventSystem) GetGroup(name string, cache_events bool) (*Group, error) {
+func (system *System) GetGroup(name string, cache_events bool) (*Group, error) {
   var ferr C.FMOD_RESULT
   var group Group
   base.Thread(func() {
     cname := C.CString(name)
-    ferr = C.FMOD_EventSystem_GetGroup(sys.system, cname, makeFmodBool(cache_events), &group.group)
+    ferr = C.FMOD_EventSystem_GetGroup(system.system, cname, makeFmodBool(cache_events), &group.group)
     C.free(unsafe.Pointer(cname))
   })
   err := base.ResultToError(ferr)
@@ -225,44 +229,62 @@ func (sys *EventSystem) GetGroup(name string, cache_events bool) (*Group, error)
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetEvent          (FMOD_EVENTSYSTEM *eventsystem, const char *name, FMOD_EVENT_MODE mode, FMOD_EVENT **event);
-func (sys *EventSystem) GetEvent(name string, mode Mode) (*Event, error) {
+func (system *System) GetEvent(name string, mode Mode) (*Event, error) {
   var ferr C.FMOD_RESULT
   var event Event
   base.Thread(func() {
     cname := C.CString(name)
-    ferr = C.FMOD_EventSystem_GetEvent(sys.system, cname, C.FMOD_EVENT_MODE(mode), &event.event)
+    ferr = C.FMOD_EventSystem_GetEvent(system.system, cname, C.FMOD_EVENT_MODE(mode), &event.event)
     C.free(unsafe.Pointer(cname))
   })
   err := base.ResultToError(ferr)
   if err != nil {
     return nil, err
   }
+  runtime.SetFinalizer(&event, finalizeEvent)
   return &event, nil
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetEventBySystemID(FMOD_EVENTSYSTEM *eventsystem, unsigned int systemid, FMOD_EVENT_MODE mode, FMOD_EVENT **event);
-func (sys *EventSystem) GetEventBySystemID(system_id int, mode Mode) (*Event, error) {
+func (system *System) GetEventBySystemID(system_id int, mode Mode) (*Event, error) {
   var ferr C.FMOD_RESULT
   var event Event
   base.Thread(func() {
-    ferr = C.FMOD_EventSystem_GetEventBySystemID(sys.system, C.uint(system_id), C.FMOD_EVENT_MODE(mode), &event.event)
+    ferr = C.FMOD_EventSystem_GetEventBySystemID(system.system, C.uint(system_id), C.FMOD_EVENT_MODE(mode), &event.event)
   })
   err := base.ResultToError(ferr)
   if err != nil {
     return nil, err
   }
+  runtime.SetFinalizer(&event, finalizeEvent)
   return &event, nil
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetEventByGUID    (FMOD_EVENTSYSTEM *eventsystem, const FMOD_GUID *guid, FMOD_EVENT_MODE mode, FMOD_EVENT **event);
+
 // FMOD_RESULT F_API FMOD_EventSystem_GetEventByGUIDString(FMOD_EVENTSYSTEM *eventsystem, const char *guid, FMOD_EVENT_MODE mode, FMOD_EVENT **event);
+func (system *System) GetEventByGUIDString(guid string, mode Mode) (*Event, error) {
+  var ferr C.FMOD_RESULT
+  var event Event
+  base.Thread(func() {
+    cguid := C.CString(guid)
+    ferr = C.FMOD_EventSystem_GetEventByGUIDString(system.system, cguid, C.FMOD_EVENT_MODE(mode), &event.event)
+    C.free(unsafe.Pointer(cguid))
+  })
+  err := base.ResultToError(ferr)
+  if err != nil {
+    return nil, err
+  }
+  runtime.SetFinalizer(&event, finalizeEvent)
+  return &event, nil
+}
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetNumEvents      (FMOD_EVENTSYSTEM *eventsystem, int *numevents);
-func (sys *EventSystem) GetNumEvents() (int, error) {
+func (system *System) GetNumEvents() (int, error) {
   var ferr C.FMOD_RESULT
   var num_events C.int
   base.Thread(func() {
-    ferr = C.FMOD_EventSystem_GetNumEvents(sys.system, &num_events)
+    ferr = C.FMOD_EventSystem_GetNumEvents(system.system, &num_events)
   })
   return int(num_events), base.ResultToError(ferr)
 }

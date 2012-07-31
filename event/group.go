@@ -7,6 +7,7 @@ import "C"
 import (
   "errors"
   "unsafe"
+  "runtime"
   "github.com/runningwild/fmod/base"
 )
 
@@ -20,13 +21,22 @@ func (g *Group) GetInfo() error {
 }
 
 // FMOD_RESULT F_API FMOD_EventGroup_LoadEventData      (FMOD_EVENTGROUP *eventgroup, FMOD_EVENT_RESOURCE resource, FMOD_EVENT_MODE mode);
-func (g *Group) LoadEventData() error {
-  return errors.New("Group.LoadEventData() has not been implemented yet.")
+func (g *Group) LoadEventData(resource Resource, mode Mode) error {
+  var ferr C.FMOD_RESULT
+  base.Thread(func() {
+    ferr = C.FMOD_EventGroup_LoadEventData(g.group, C.FMOD_EVENT_RESOURCE(resource), C.FMOD_EVENT_MODE(mode))
+  })
+  return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_EventGroup_FreeEventData      (FMOD_EVENTGROUP *eventgroup, FMOD_EVENT *event, FMOD_BOOL waituntilready);
-func (g *Group) FreeEventData() error {
-  return errors.New("Group.FreeEventData() has not been implemented yet.")
+func (g *Group) FreeEventData(event *Event, wait_until_ready bool) error {
+  var ferr C.FMOD_RESULT
+  base.Thread(func() {
+    ferr = C.FMOD_EventGroup_FreeEventData(g.group, event.event, makeFmodBool(wait_until_ready))
+  })
+  runtime.SetFinalizer(event, nil)
+  return base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_EventGroup_GetGroup           (FMOD_EVENTGROUP *eventgroup, const char *name, FMOD_BOOL cacheevents, FMOD_EVENTGROUP **group);
@@ -54,6 +64,10 @@ func (g *Group) GetNumGroups() error {
   return errors.New("Group.GetNumGroups() has not been implemented yet.")
 }
 
+func finalizeGroupEvent(event *Event) {
+  event.group.FreeEventData(event, true)
+}
+
 // FMOD_RESULT F_API FMOD_EventGroup_GetEvent           (FMOD_EVENTGROUP *eventgroup, const char *name, FMOD_EVENT_MODE mode, FMOD_EVENT **event);
 func (g *Group) GetEvent(name string, mode Mode) (*Event, error) {
   var event Event
@@ -67,6 +81,8 @@ func (g *Group) GetEvent(name string, mode Mode) (*Event, error) {
   if err != nil {
     return nil, err
   }
+  event.group = g
+  runtime.SetFinalizer(&event, finalizeGroupEvent)
   return &event, nil
 }
 
@@ -81,6 +97,8 @@ func (g *Group) GetEventByIndex(index int, mode Mode) (*Event, error) {
   if err != nil {
     return nil, err
   }
+  event.group = g
+  runtime.SetFinalizer(&event, finalizeGroupEvent)
   return &event, nil
 }
 
