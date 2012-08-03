@@ -112,8 +112,17 @@ func (system *System) GetSystemObject() error {
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_GetMusicSystem    (FMOD_EVENTSYSTEM *eventsystem, FMOD_MUSICSYSTEM **musicsystem);
-func (system *System) GetMusicSystem() error {
-  return errors.New("fmod_event.GetMusicSystem() is not implemented.")
+func (system *System) GetMusicSystem() (*MusicSystem, error) {
+  var ferr C.FMOD_RESULT
+  var music MusicSystem
+  base.Thread(func() {
+    ferr = C.FMOD_EventSystem_GetMusicSystem(system.system, &music.system)
+  })
+  err := base.ResultToError(ferr)
+  if err != nil {
+    return nil, err
+  }
+  return &music, nil
 }
 
 // FMOD_RESULT F_API FMOD_EventSystem_SetLanguage       (FMOD_EVENTSYSTEM *eventsystem, const char *language);
