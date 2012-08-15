@@ -150,14 +150,23 @@ func (e *Event) GetCategory() error {
   return errors.New("Event.GetCategory() has not been implemented yet.")
 }
 
-// FMOD_RESULT F_API FMOD_Event_SetVolume               (FMOD_EVENT *event, float volume);
-func (e *Event) SetVolume() error {
-  return errors.New("Event.SetVolume() has not been implemented yet.")
+// FMOD_RESULT F_API FMOD_Event_SetVolume         (FMOD_EVENT *event, float volume);
+func (e *Event) SetVolume(volume float64) error {
+  var ferr C.FMOD_RESULT
+  base.Thread(func() {
+    ferr = C.FMOD_Event_SetVolume(e.event, C.float(volume))
+  })
+  return base.ResultToError(ferr)
 }
 
-// FMOD_RESULT F_API FMOD_Event_GetVolume               (FMOD_EVENT *event, float *volume);
-func (e *Event) GetVolume() error {
-  return errors.New("Event.GetVolume() has not been implemented yet.")
+// FMOD_RESULT F_API FMOD_Event_GetVolume         (FMOD_EVENT *event, float *volume);
+func (e *Event) GetVolume() (float64, error) {
+  var ferr C.FMOD_RESULT
+  var volume C.float
+  base.Thread(func() {
+    ferr = C.FMOD_Event_GetVolume(e.event, &volume)
+  })
+  return float64(volume), base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_Event_SetPitch                (FMOD_EVENT *event, float pitch, FMOD_EVENT_PITCHUNITS units);
@@ -170,24 +179,42 @@ func (e *Event) GetPitch() error {
   return errors.New("Event.GetPitch() has not been implemented yet.")
 }
 
-// FMOD_RESULT F_API FMOD_Event_SetPaused               (FMOD_EVENT *event, FMOD_BOOL paused);
-func (e *Event) SetPaused() error {
-  return errors.New("Event.SetPaused() has not been implemented yet.")
+// FMOD_RESULT F_API FMOD_Event_SetPaused         (FMOD_EVENT *event, FMOD_BOOL paused);
+func (event *Event) SetPaused(paused bool) error {
+  var ferr C.FMOD_RESULT
+  base.Thread(func() {
+    ferr = C.FMOD_Event_SetPaused(event.event, makeFmodBool(paused))
+  })
+  return base.ResultToError(ferr)
 }
 
-// FMOD_RESULT F_API FMOD_Event_GetPaused               (FMOD_EVENT *event, FMOD_BOOL *paused);
-func (e *Event) GetPaused() error {
-  return errors.New("Event.GetPaused() has not been implemented yet.")
+// FMOD_RESULT F_API FMOD_Event_GetPaused         (FMOD_EVENT *event, FMOD_BOOL *paused);
+func (event *Event) GetPaused() (bool, error) {
+  var ferr C.FMOD_RESULT
+  var paused C.FMOD_BOOL
+  base.Thread(func() {
+    ferr = C.FMOD_Event_GetPaused(event.event, &paused)
+  })
+  return paused != 0, base.ResultToError(ferr)
 }
 
-// FMOD_RESULT F_API FMOD_Event_SetMute                 (FMOD_EVENT *event, FMOD_BOOL mute);
-func (e *Event) SetMute() error {
-  return errors.New("Event.SetMute() has not been implemented yet.")
+// FMOD_RESULT F_API FMOD_Event_SetMute           (FMOD_EVENT *event, FMOD_BOOL mute);
+func (event *Event) SetMute(mute bool) error {
+  var ferr C.FMOD_RESULT
+  base.Thread(func() {
+    ferr = C.FMOD_Event_SetMute(event.event, makeFmodBool(mute))
+  })
+  return base.ResultToError(ferr)
 }
 
-// FMOD_RESULT F_API FMOD_Event_GetMute                 (FMOD_EVENT *event, FMOD_BOOL *mute);
-func (e *Event) GetMute() error {
-  return errors.New("Event.GetMute() has not been implemented yet.")
+// FMOD_RESULT F_API FMOD_Event_GetMute           (FMOD_EVENT *event, FMOD_BOOL *mute);
+func (event *Event) GetMute() (bool, error) {
+  var ferr C.FMOD_RESULT
+  var mute C.FMOD_BOOL
+  base.Thread(func() {
+    ferr = C.FMOD_Event_GetMute(event.event, &mute)
+  })
+  return mute != 0, base.ResultToError(ferr)
 }
 
 // FMOD_RESULT F_API FMOD_Event_Set3DAttributes         (FMOD_EVENT *event, const FMOD_VECTOR *position, const FMOD_VECTOR *velocity, const FMOD_VECTOR *orientation);
