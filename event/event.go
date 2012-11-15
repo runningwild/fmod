@@ -8,7 +8,7 @@ import (
   "errors"
   "unsafe"
   "runtime"
-  "github.com/runningwild/fmod/base"
+  "github.com/MobRulesGames/fmod/base"
 )
 
 type Event struct {

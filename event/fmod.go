@@ -1,5 +1,6 @@
 package fmod_event
 
+// #cgo windows LDFLAGS: -Llib fmod_event.dll -Llib fmodex.dll
 // #cgo darwin  LDFLAGS: -Llib -lfmodevent -lfmodex
 // #cgo CFLAGS: -Iinc -I../ex/inc
 // #include "fmod_event.h"
@@ -10,7 +11,7 @@ import (
   "errors"
   "unsafe"
   "runtime"
-  "github.com/runningwild/fmod/base"
+  "github.com/MobRulesGames/fmod/base"
 )
 
 func makeFmodBool(b bool) C.FMOD_BOOL {

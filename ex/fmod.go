@@ -9,7 +9,7 @@ import "C"
 
 import (
   "unsafe"
-  "github.com/runningwild/fmod/base"
+  "github.com/MobRulesGames/fmod/base"
 )
 
 const null = unsafe.Pointer(uintptr(0))

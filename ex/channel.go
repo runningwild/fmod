@@ -4,7 +4,7 @@ package fmod_ex
 import "C"
 
 import (
-  "github.com/runningwild/fmod/base"
+  "github.com/MobRulesGames/fmod/base"
 )
 
 type Channel struct {
