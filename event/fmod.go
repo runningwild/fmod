@@ -1,6 +1,6 @@
 package fmod_event
 
-// #cgo windows LDFLAGS: -Llib fmod_event.dll -Llib fmodex.dll
+// #cgo windows LDFLAGS: ../lib/windows/fmod_eventL.dll ../lib/windows/fmodexL.dll
 // #cgo darwin  LDFLAGS: -Llib -lfmodevent -lfmodex
 // #cgo CFLAGS: -Iinc -I../ex/inc
 // #include "fmod_event.h"
