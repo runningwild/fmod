@@ -1,6 +1,6 @@
 package fmod_ex
 
-// #cgo darwin  LDFLAGS: -Llib -lfmodex
+// #cgo darwin  LDFLAGS: -L../lib/darwin -lfmodevent -lfmodex
 // #cgo CFLAGS: -Iinc
 // #include "fmod.h"
 // #include "fmod_errors.h"
@@ -8,8 +8,8 @@ package fmod_ex
 import "C"
 
 import (
-  "unsafe"
   "github.com/MobRulesGames/fmod/base"
+  "unsafe"
 )
 
 const null = unsafe.Pointer(uintptr(0))
